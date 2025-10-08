@@ -12,13 +12,17 @@ export class CoffeesService {
   ) {}
 
   async create(createCoffeeDto: CreateCoffeeDto) {
+  try {
     const result = await this.db
       .insert(coffeesTable)
       .values(createCoffeeDto)
       .returning();
     return result[0];
+  } catch (error) {
+    console.error('Error creating coffee:', error);
+    throw error;
   }
-
+}
   async findAll() {
     return await this.db.select().from(coffeesTable);
   }
