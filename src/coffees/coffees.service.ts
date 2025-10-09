@@ -1,8 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { CreateCoffeeDto } from './dto/create-coffee.dto';
 import { UpdateCoffeeDto } from './dto/update-coffee.dto';
-import { coffeesTable } from '../db/schema';
+import { coffeesTable, flavorsTable, coffeeFlavorsTable } from '../db/schema';
 
 @Injectable()
 export class CoffeesService {
@@ -23,16 +23,61 @@ export class CoffeesService {
     throw error;
   }
 }
-  async findAll() {
-    return await this.db.select().from(coffeesTable);
-  }
+async findAll() {
+    const coffees = await this.db.select().from(coffeesTable);
 
+    // For each coffee, fetch related flavors
+    const result = await Promise.all(
+      coffees.map(async (coffee) => {
+        const flavorRelations = await this.db
+          .select({
+            id: flavorsTable.id,
+            name: flavorsTable.name,
+          })
+          .from(flavorsTable)
+          .innerJoin(
+            coffeeFlavorsTable,
+            eq(flavorsTable.id, coffeeFlavorsTable.flavorId),
+          )
+          .where(eq(coffeeFlavorsTable.coffeeId, coffee.id));
+
+        return {
+          ...coffee,
+          flavors: flavorRelations.map((f) => ({
+            id: f.id,
+            name: f.name,
+          })),
+        };
+      }),
+    );
+    return result;
+  }
   async findOne(id: number) {
-    const result = await this.db
+    const coffee = await this.db
       .select()
       .from(coffeesTable)
       .where(eq(coffeesTable.id, id));
-    return result[0];
+
+    if (!coffee.length) {
+      throw new NotFoundException(`Coffee with id ${id} not found`);
+    }
+
+    const flavors = await this.db
+      .select({
+        id: flavorsTable.id,
+        name: flavorsTable.name,
+      })
+      .from(flavorsTable)
+      .innerJoin(
+        coffeeFlavorsTable,
+        eq(flavorsTable.id, coffeeFlavorsTable.flavorId),
+      )
+      .where(eq(coffeeFlavorsTable.coffeeId, id));
+
+    return {
+      ...coffee[0],
+      flavors,
+    };
   }
 
   async update(id: number, updateCoffeeDto: UpdateCoffeeDto) {
