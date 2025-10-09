@@ -24,6 +24,7 @@ export class CoffeesService {
   }
 }
 async findAll() {
+  try {
     const coffees = await this.db.select().from(coffeesTable);
 
     // For each coffee, fetch related flavors
@@ -51,9 +52,15 @@ async findAll() {
       }),
     );
     return result;
+  } catch (error) {
+   console.error('Error fetching coffees:', error);
+    throw error;
+  }
+    
   }
   async findOne(id: number) {
-    const coffee = await this.db
+    try {
+      const coffee = await this.db
       .select()
       .from(coffeesTable)
       .where(eq(coffeesTable.id, id));
@@ -78,22 +85,35 @@ async findAll() {
       ...coffee[0],
       flavors,
     };
+    } catch (error) {
+       console.error('Error fetching coffee:', error);
+      throw error;
+    }
   }
 
   async update(id: number, updateCoffeeDto: UpdateCoffeeDto) {
-    const result = await this.db
+   try {
+      const updatedCoffee = await this.db
       .update(coffeesTable)
       .set(updateCoffeeDto)
       .where(eq(coffeesTable.id, id))
       .returning();
-    return result[0];
+    return updatedCoffee[0];
+    } catch (error) {
+      console.error('Error updating coffee:', error);
+      throw error;
+    }
   }
 
   async remove(id: number) {
-    const result = await this.db
+     try {
+      const result = await this.db
       .delete(coffeesTable)
       .where(eq(coffeesTable.id, id))
       .returning();
-    return result[0];
+    } catch (error) {
+      console.error('Error deleting coffee:', error);
+      throw error;
+    }
   }
 }
