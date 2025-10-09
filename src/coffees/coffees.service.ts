@@ -59,7 +59,8 @@ async findAll() {
     
   }
   async findOne(id: number) {
-    const result = await this.db
+    try{
+        const coffee = await this.db
       .select()
       .from(coffeesTable)
       .where(eq(coffeesTable.id, id));
@@ -97,7 +98,11 @@ async findAll() {
       .set(updateCoffeeDto)
       .where(eq(coffeesTable.id, id))
       .returning();
-    return result[0];
+    return updatedCoffee[0];
+    } catch (error) {
+      console.error('Error updating coffee:', error);
+      throw error;
+    }
   }
 
   async remove(id: number) {
@@ -106,6 +111,9 @@ async findAll() {
       .delete(coffeesTable)
       .where(eq(coffeesTable.id, id))
       .returning();
-    return result[0];
+    } catch (error) {
+      console.error('Error deleting coffee:', error);
+      throw error;
+    }
   }
 }
