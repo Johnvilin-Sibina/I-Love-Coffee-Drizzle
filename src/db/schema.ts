@@ -1,11 +1,13 @@
 import { pgTable, integer, varchar } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { jsonb } from "drizzle-orm/pg-core";
 
 //Coffee Table 
 export const coffeesTable = pgTable("coffees", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 50 }).notNull(),
   brand: varchar({ length: 50 }).notNull(),
+  recommendations: integer().default(0).notNull()
 });
 
 // Flavor Table 
@@ -23,6 +25,15 @@ export const coffeeFlavorsTable = pgTable("coffee_flavors", {
     .notNull()
     .references(() => flavorsTable.id, { onDelete: "cascade" }),
 });
+
+
+// Events table
+export const eventsTable = pgTable("events",{
+  id:integer().primaryKey().generatedAlwaysAsIdentity(),
+  name:varchar({length:50}),
+  type:varchar({length:50}),
+  payload: jsonb().$type<Record<string, any>>().notNull()
+})
 
 // Define Relations 
 export const coffeesRelations = relations(coffeesTable, ({ many }) => ({
@@ -44,9 +55,11 @@ export const coffeeFlavorsRelations = relations(coffeeFlavorsTable, ({ one }) =>
   }),
 }));
 
+
 // Export all tables
 export const schema = {
   coffeesTable,
   flavorsTable,
   coffeeFlavorsTable,
+  eventsTable
 };

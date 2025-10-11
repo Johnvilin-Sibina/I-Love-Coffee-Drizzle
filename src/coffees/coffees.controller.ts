@@ -31,4 +31,9 @@ export class CoffeesController {
   remove(@Param('id') id: string) {
     return this.coffeesService.remove(+id);
   }
+
+   @Patch(':id/recommend')
+  async recommendCoffee(@Param('id') id: string) {
+    return this.coffeesService.recommendCoffee(+id);
+  }
 }
