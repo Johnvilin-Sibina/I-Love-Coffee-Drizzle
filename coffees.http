@@ -1,0 +1,56 @@
+@BASE_URL = http://localhost:3000
+@COFFEE_ID = 1
+
+// Get all Coffees
+GET {{BASE_URL}}/coffees
+User-Agent: rest-client
+Content-Type: application/json
+
+###
+
+//Get single coffee by id
+GET {{BASE_URL}}/coffees/{{COFFEE_ID}}
+User-Agent: rest-client
+Content-Type: application/json
+
+###
+
+//Create Coffee
+POST {{BASE_URL}}/coffees
+User-Agent: rest-client
+Content-Type: application/json
+
+{
+    "name":"Coffee 1",
+    "brand": "Brand 1"
+}
+
+###
+
+//Update a coffee
+PATCH {{BASE_URL}}/coffees/{{COFFEE_ID}}
+User-Agent: rest-client
+Content-Type: application/json
+
+{
+    "name":"Coffee 3",
+    "brand": "Brand 3"
+}
+
+###
+
+// Delete a coffee
+DELETE {{BASE_URL}}/coffees/{{COFFEE_ID}}
+User-Agent: rest-client
+Content-Type: application/json
+
+### 
+
+//Recommend coffee
+PATCH {{BASE_URL}}/coffees/{{COFFEE_ID}}/recommend
+User-Agent: rest-client
+Content-Type: application/json
+
+{
+    "payload":1
+}
